@@ -1,1 +1,8 @@
 .DS_Store
+src/backend/docker-compose.yml
+src/backend/.env
+src/backend/.venv
+
+__pycache__/
+*.py[cod]
+src/backend/db-data
