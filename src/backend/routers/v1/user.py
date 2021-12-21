@@ -3,6 +3,7 @@ import datetime
 from pathlib import Path
 from typing import Optional
 
+import premailer
 from pydantic import BaseModel, EmailStr
 from PIL import Image, UnidentifiedImageError
 from sqlmodel import select, update
@@ -59,7 +60,7 @@ async def post(
     session: AsyncSession = Depends(get_session),
     templates: Jinja2Templates = Depends(get_templates),
 ):
-    """Envoie un mail d'inscription"""
+    """Envoie un mail d'inscription."""
     query = select(1).select_from(db.User).where(db.User.email == body.email).exists().select()
     email_already_used = await session.execute(query)
     if email_already_used.scalar() is True:
@@ -78,6 +79,7 @@ async def post(
     activation_link = f"{settings.api_deployment_domain}/v1/user/register?incription_token={jwt_token}"
     template = templates.get_template("welcome.html")
     content_html = template.render(lastname=body.lastname, activation_link=activation_link)
+    content_html = premailer.transform(content_html)
     tasks.add_task(send_mail, to=body.email, content_html=content_html, subject=f"Bienvenue {body.lastname}")
     return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content={"message": "Invitation sent by email"})
 
@@ -92,7 +94,7 @@ class GetMeResponse(BaseModel):
 
 @router.get("/me", response_model=GetMeResponse)
 async def get_me(user: db.User = Depends(get_user)):
-    """Retourne son profil utilisateur"""
+    """Retourne son profil utilisateur."""
     user = user.dict()
     user["has_avatar"] = bool(user["avatar_id"])
     return user
@@ -131,7 +133,7 @@ async def post_me_avatar(
     me: db.User = Depends(get_user),
     session: AsyncSession = Depends(get_session),
 ):
-    """Permet d'éditer sa photo de profile"""
+    """Permet d'éditer sa photo de profil."""
     if Path(avatar.filename).suffix not in (".png", ".jpeg"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="bad file extension")
 
@@ -175,16 +177,16 @@ class PostTokenBody(BaseModel):
     password: str
 
 
-@router.post("/token", description="TODO")
+@router.post("/token")
 async def post_token(
     body: PostTokenBody,
     token_in_body: bool = False,
     settings: Settings = Depends(get_settings),
     session: AsyncSession = Depends(get_session),
 ):
-    """Retourne un token d'authentification
-        Si token_in_body = true => retourne le token dans le corps de la réponse
-        Sinon => assigne le token via un setCookie
+    """Retourne un token d'authentification.
+    - Si token_in_body = true => retourne le token dans le corps de la réponse
+    - Sinon => assigne le token via un setCookie
     """
     query = (
         select(db.User)
@@ -222,7 +224,7 @@ async def get_register(
     settings: Settings = Depends(get_settings),
     session: AsyncSession = Depends(get_session),
 ):
-    """Permet de créer un utilisateur via un token JWT.
+    """Permet de créer un utilisateur via un token JWT.<br>
     Ne devrait être appelé que par le lien du mail d'inscription.
     """
     try:
@@ -258,7 +260,7 @@ async def get_by_id(
     user_id: int,
     session: AsyncSession = Depends(get_session),
 ):
-    """Retourne un utilisateur donné (par id)"""
+    """Retourne un utilisateur donné."""
     user_res = await session.execute(select(db.User).where(db.User.id == user_id).limit(1))
     user: Optional[db.User] = user_res.scalar()
     if user is None:
@@ -274,7 +276,7 @@ async def get_by_id_avatar(
     user_id: int,
     session: AsyncSession = Depends(get_session),
 ):
-    """Retourne l'avatar d'un utilisateur donné (par id)"""
+    """Retourne l'avatar d'un utilisateur donné."""
     query = (
         select(db.Attachment)
         .select_from(db.User)
