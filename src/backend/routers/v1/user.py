@@ -38,7 +38,6 @@ class PostResponse409(BaseModel):
 
 @router.post(
     "/",
-    description="TODO",
     status_code=status.HTTP_202_ACCEPTED,
     responses={
         status.HTTP_202_ACCEPTED: {
@@ -60,6 +59,7 @@ async def post(
     session: AsyncSession = Depends(get_session),
     templates: Jinja2Templates = Depends(get_templates),
 ):
+    """Envoie un mail d'inscription"""
     query = select(1).select_from(db.User).where(db.User.email == body.email).exists().select()
     email_already_used = await session.execute(query)
     if email_already_used.scalar() is True:
@@ -75,7 +75,7 @@ async def post(
         "exp": now + 60 * 60 * 24,
     }
     jwt_token = jwt.encode(jwt_body, settings.jwt_secret.get_secret_value(), algorithm="HS256")
-    activation_link = f"{settings.deployment_domain}/v1/user/register?incription_token={jwt_token}"
+    activation_link = f"{settings.api_deployment_domain}/v1/user/register?incription_token={jwt_token}"
     template = templates.get_template("welcome.html")
     content_html = template.render(lastname=body.lastname, activation_link=activation_link)
     tasks.add_task(send_mail, to=body.email, content_html=content_html, subject=f"Bienvenue {body.lastname}")
@@ -92,6 +92,7 @@ class GetMeResponse(BaseModel):
 
 @router.get("/me", response_model=GetMeResponse)
 async def get_me(user: db.User = Depends(get_user)):
+    """Retourne son profil utilisateur"""
     user = user.dict()
     user["has_avatar"] = bool(user["avatar_id"])
     return user
@@ -130,6 +131,7 @@ async def post_me_avatar(
     me: db.User = Depends(get_user),
     session: AsyncSession = Depends(get_session),
 ):
+    """Permet d'éditer sa photo de profile"""
     if Path(avatar.filename).suffix not in (".png", ".jpeg"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="bad file extension")
 
@@ -180,6 +182,10 @@ async def post_token(
     settings: Settings = Depends(get_settings),
     session: AsyncSession = Depends(get_session),
 ):
+    """Retourne un token d'authentification
+        Si token_in_body = true => retourne le token dans le corps de la réponse
+        Sinon => assigne le token via un setCookie
+    """
     query = (
         select(db.User)
         .where(db.User.email == body.email)
@@ -216,6 +222,9 @@ async def get_register(
     settings: Settings = Depends(get_settings),
     session: AsyncSession = Depends(get_session),
 ):
+    """Permet de créer un utilisateur via un token JWT.
+    Ne devrait être appelé que par le lien du mail d'inscription.
+    """
     try:
         body = jwt.decode(incription_token, settings.jwt_secret.get_secret_value(), algorithms="HS256")
     except jose_exceptions.ExpiredSignatureError:
@@ -249,7 +258,7 @@ async def get_by_id(
     user_id: int,
     session: AsyncSession = Depends(get_session),
 ):
-    """Get user by id"""
+    """Retourne un utilisateur donné (par id)"""
     user_res = await session.execute(select(db.User).where(db.User.id == user_id).limit(1))
     user: Optional[db.User] = user_res.scalar()
     if user is None:
@@ -265,7 +274,7 @@ async def get_by_id_avatar(
     user_id: int,
     session: AsyncSession = Depends(get_session),
 ):
-    """Get user's avatar by id"""
+    """Retourne l'avatar d'un utilisateur donné (par id)"""
     query = (
         select(db.Attachment)
         .select_from(db.User)

@@ -1,11 +1,14 @@
 # coding: utf-8
 from pathlib import Path
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import BaseSettings, SecretStr, Field
 
 
 class Settings(BaseSettings):
+    mode: Literal["development", "production"] = Field(..., env="MODE")
+
     jwt_secret: SecretStr = Field(..., env="JWT_SECRET")
 
     postgres_host: str = Field("localhost", env="POSTGRES_HOST")
@@ -14,7 +17,8 @@ class Settings(BaseSettings):
     postgres_password: SecretStr = Field(..., env="POSTGRES_PASSWORD")
     postgres_database: str = Field(..., env="POSTGRES_DATABASE")
 
-    deployment_domain: str = Field(..., env="DEPLOYMENT_DOMAIN")
+    api_deployment_domain: str = Field(..., env="API_DEPLOYMENT_DOMAIN")
+    front_deployment_domain: str = Field(..., env="FRONT_DEPLOYMENT_DOMAIN")
 
     mailjet_apikey_public: SecretStr = Field(..., env="MAILJET_APIKEY_PUBLIC")
     mailjet_apikey_private: SecretStr = Field(..., env="MAILJET_APIKEY_PRIVATE")
