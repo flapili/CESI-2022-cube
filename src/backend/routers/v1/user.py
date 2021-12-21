@@ -5,7 +5,6 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 from PIL import Image, UnidentifiedImageError
-from sqlalchemy.sql.functions import user
 from sqlmodel import select, update
 from sqlalchemy import exc as sqlalchemy_exc
 from jose import jwt, exceptions as jose_exceptions
@@ -250,6 +249,7 @@ async def get_by_id(
     user_id: int,
     session: AsyncSession = Depends(get_session),
 ):
+    """Get user by id"""
     user_res = await session.execute(select(db.User).where(db.User.id == user_id).limit(1))
     user: Optional[db.User] = user_res.scalar()
     if user is None:
@@ -265,6 +265,7 @@ async def get_by_id_avatar(
     user_id: int,
     session: AsyncSession = Depends(get_session),
 ):
+    """Get user's avatar by id"""
     query = (
         select(db.Attachment)
         .select_from(db.User)
