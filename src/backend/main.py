@@ -4,15 +4,11 @@ from importlib import import_module
 
 from fastapi import FastAPI
 
+Path("attachments").mkdir(exist_ok=True)
 
 app = FastAPI()
-
-
-for file in Path("routes").glob("**/handler_*.py"):
-    normalized_path = ".".join(file.parts[:-1] + (file.stem,))
+for router in Path("routers").glob("**/*.py"):
+    normalized_path = ".".join(router.parts[:-1] + (router.stem,))
     module = import_module(normalized_path)
-    register_route_function = getattr(module, "register_route", None)
-    if register_route_function is not None:
-        register_route_function(app)
-    else:
-        print("[warning] {file} has not attribute 'register_route'")
+    router_prefix = "/".join(router.parts[1:-1] + (router.stem,))
+    app.include_router(module.router, prefix=f"/{router_prefix}", tags=[router.stem])
