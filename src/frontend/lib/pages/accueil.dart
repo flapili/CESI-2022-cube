@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:ressources_relationnelles/common/constants.dart';
 
 class Accueil extends StatefulWidget {
   const Accueil({Key? key}) : super(key: key);
@@ -96,13 +97,13 @@ class _AccueilState extends State<Accueil> {
                           title: Text(post['titre'],
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                                color: cyanGreen
                               ),
                               textAlign: TextAlign.center),
                           subtitle: Text(post['categorie'],
                               style: TextStyle(
                                 fontWeight: FontWeight.w400,
-                                color: Colors.green.shade600,
+                                color: cyanGreen
                               ),
                               textAlign: TextAlign.center),
                           trailing: IconButton(

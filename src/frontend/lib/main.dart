@@ -1,6 +1,8 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
 import 'package:flutter/material.dart';
 import 'package:ressources_relationnelles/pages/accueil.dart';
-//import 'post_widget.dart';
+import 'common/constants.dart';
 import 'pages/accueil.dart';
 import 'pages/rechercher.dart';
 import 'pages/ajouter.dart';
@@ -38,15 +40,16 @@ class _MyAppState extends State<MyApp> {
       title: 'Ressources relationnelles',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: Colors.green[100],
+        backgroundColor: lightGreen,
         appBar: AppBar(
           centerTitle: true,
-          backgroundColor: Colors.grey[600],
+          backgroundColor: darkGreen,
           elevation: 0,
           leading: IconButton(
             onPressed: () {},
             icon: const Icon(
             Icons.settings_outlined,
+            //Aide à ajouter
             color: Colors.black,
             ),
           ),
@@ -73,28 +76,27 @@ bottomNavigationBar: BottomNavigationBar(
             BottomNavigationBarItem(
               icon: const Icon(Icons.home),
               label:'Accueil',
-              backgroundColor: Colors.grey[600],
+              backgroundColor: darkGreen,
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.search),
+              icon: Icon(Icons.search),
               label:'Rechercher',
-              backgroundColor: Colors.grey[600],
+              backgroundColor: darkGreen,
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.add_circle_outline),
+              icon: Icon(Icons.add_circle_outline),
               label:'Ajouter article',
-              backgroundColor: Colors.grey[600],
+              backgroundColor: darkGreen,
             ),
             BottomNavigationBarItem(
               icon: //Icon(Icons.person_outline),
-              const CircleAvatar(backgroundImage: AssetImage('assets/images/profil/1.jpg'),),
-              
+              CircleAvatar(backgroundImage: AssetImage('assets/images/profil/1.jpg'),),
               label:'Profil',
-              backgroundColor: Colors.grey[600],
+              backgroundColor: darkGreen
             ),
           ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: lightGreen,
         onTap: _onItemTapped,
       ),
       )

@@ -26,7 +26,7 @@ class _RechercherState extends State<Rechercher> {
   @override
   Widget build(BuildContext context) {
       return Scaffold(
-        backgroundColor: Colors.green[100],
+        backgroundColor: Color(0xFFC1DFF0),
         appBar: AppBar(
           backgroundColor: Colors.grey.shade50,
           actions: const [
