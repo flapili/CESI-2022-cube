@@ -43,7 +43,7 @@ return SingleChildScrollView(
         child: TextField(
           decoration: InputDecoration(
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0),),
-              hintText: 'Titre de la ressource',
+              hintText: 'Titre de la rrrrrrrrrressource',
               fillColor: Colors.white,
               filled: true,
             ),
