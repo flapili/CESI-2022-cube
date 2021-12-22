@@ -1,4 +1,5 @@
 # coding: utf-8
+import zoneinfo
 import datetime
 from pathlib import Path
 from typing import Optional
@@ -29,6 +30,7 @@ class PostBody(BaseModel):
     email: EmailStr
     password: constr(strip_whitespace=True, min_length=8)
     phone_number: constr(strip_whitespace=True, regex=const.PHONE_NUMBER_REGEX)
+    birthday: datetime.datetime
 
 
 class PostResponse202(BaseModel):
@@ -73,6 +75,8 @@ async def post(
         "firstname": body.firstname,
         "lastname": body.lastname,
         "email": body.email,
+        "phone_number": body.phone_number,
+        "birthday": body.birthday.replace(tzinfo=zoneinfo.ZoneInfo("UTC")).isoformat(),
         "hashed_password": hash_password(body.password),
         "iat": now,
         "exp": now + 60 * 60 * 24,
@@ -92,6 +96,7 @@ class GetMeResponse(BaseModel):
     email: EmailStr
     phone_number: str
     created_at: datetime.datetime
+    birthdate: datetime.datetime
     has_avatar: bool
 
 
@@ -254,6 +259,7 @@ class GetUserByIdResponse(BaseModel):
     firstname: str
     lastname: str
     created_at: datetime.datetime
+    birthday: datetime.datetime
     has_avatar: bool
 
 
