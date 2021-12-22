@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ressources_relationnelles/pages/accueil.dart';
-import 'post_widget.dart';
+//import 'post_widget.dart';
 import 'pages/accueil.dart';
 import 'pages/rechercher.dart';
 import 'pages/ajouter.dart';
