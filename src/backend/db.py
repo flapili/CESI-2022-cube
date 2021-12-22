@@ -3,7 +3,10 @@ import datetime
 from uuid import uuid4
 from typing import Optional
 
+from pydantic import constr
 from sqlmodel import Field, SQLModel, Column, DateTime, func, CheckConstraint, UniqueConstraint
+
+import const
 
 
 class Base(SQLModel):
@@ -29,11 +32,12 @@ class Attachment(Base, table=True):
 
 class User(Base, table=True):
     __tablename__ = "user"
-    __table_args__ = (UniqueConstraint("email"),)
+    __table_args__ = (UniqueConstraint("email"), UniqueConstraint("phone_number"))
 
-    firstname: str = Field(nullable=False)
-    lastname: str = Field(nullable=False)
+    firstname: constr(max_length=32) = Field(nullable=False)
+    lastname: constr(max_length=32) = Field(nullable=False)
     email: str = Field(nullable=False)
     hashed_password: str = Field(nullable=False)
+    phone_number: constr(strip_whitespace=True, regex=const.PHONE_NUMBER_REGEX) = Field(nullable=False)
     avatar_id: Optional[int] = Field(foreign_key="attachment.id")
     disabled_at: Optional[datetime.datetime] = Field(sa_column=Column(DateTime(timezone=True)))

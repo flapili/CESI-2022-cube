@@ -15,6 +15,7 @@ from fastapi.templating import Jinja2Templates
 
 
 import db
+import const
 from settings import get_settings, Settings
 from utils import get_session, AsyncSession, send_mail, hash_password, get_templates, get_user
 
@@ -23,10 +24,11 @@ router = APIRouter()
 
 
 class PostBody(BaseModel):
-    firstname: str
-    lastname: str
+    firstname: constr(strip_whitespace=True, max_length=32)
+    lastname: constr(strip_whitespace=True, max_length=32)
     email: EmailStr
     password: constr(strip_whitespace=True, min_length=8)
+    phone_number: constr(strip_whitespace=True, regex=const.PHONE_NUMBER_REGEX)
 
 
 class PostResponse202(BaseModel):
@@ -88,6 +90,7 @@ class GetMeResponse(BaseModel):
     firstname: str
     lastname: str
     email: EmailStr
+    phone_number: str
     created_at: datetime.datetime
     has_avatar: bool
 
@@ -250,7 +253,6 @@ async def get_register(
 class GetUserByIdResponse(BaseModel):
     firstname: str
     lastname: str
-    email: EmailStr
     created_at: datetime.datetime
     has_avatar: bool
 
