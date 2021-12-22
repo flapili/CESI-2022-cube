@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 import premailer
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, constr
 from PIL import Image, UnidentifiedImageError
 from sqlmodel import select, update
 from sqlalchemy import exc as sqlalchemy_exc
@@ -26,7 +26,7 @@ class PostBody(BaseModel):
     firstname: str
     lastname: str
     email: EmailStr
-    password: str
+    password: constr(strip_whitespace=True, min_length=8)
 
 
 class PostResponse202(BaseModel):
@@ -78,7 +78,7 @@ async def post(
     jwt_token = jwt.encode(jwt_body, settings.jwt_secret.get_secret_value(), algorithm="HS256")
     activation_link = f"{settings.api_deployment_domain}/v1/user/register?incription_token={jwt_token}"
     template = templates.get_template("welcome.html")
-    content_html = template.render(lastname=body.lastname, activation_link=activation_link)
+    content_html = template.render(firstname=body.firstname, activation_link=activation_link)
     content_html = premailer.transform(content_html)
     tasks.add_task(send_mail, to=body.email, content_html=content_html, subject=f"Bienvenue {body.lastname}")
     return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content={"message": "Invitation sent by email"})
