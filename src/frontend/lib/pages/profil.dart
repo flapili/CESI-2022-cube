@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'favoris.dart';
 import 'package:ressources_relationnelles/common/constants.dart';
 
 class Profil extends StatefulWidget {
@@ -59,7 +60,11 @@ class _ProfilState extends State<Profil> {
                         ),
                       ],
                     ),
-                    Column(
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Favoris()));
+                      },
+                      child: Column(
                       children: [
                         Icon(Icons.favorite_outlined, size: 40),
                         Text(
@@ -71,6 +76,7 @@ class _ProfilState extends State<Profil> {
                               color: cyanGreen),
                         ),
                       ],
+                    ),
                     )
                   ],
                 )),
@@ -78,7 +84,7 @@ class _ProfilState extends State<Profil> {
                   padding: EdgeInsets.only(top: 10, right: 20, left: 20),
                   child: Row(
                     children: [
-                      Text('2 articles publiés', style: TextStyle(
+                      Text('2 ressources publiées', style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16),)
                     ],

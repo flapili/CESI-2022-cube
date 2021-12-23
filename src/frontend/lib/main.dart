@@ -7,6 +7,7 @@ import 'pages/accueil.dart';
 import 'pages/rechercher.dart';
 import 'pages/ajouter.dart';
 import 'pages/profil.dart';
+import './pages/components/app_bar.dart';
 //import 'test.dart';
 
 void main() {
@@ -41,64 +42,11 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: lightGreen,
-        appBar: AppBar(
-          centerTitle: true,
-          backgroundColor: darkGreen,
-          elevation: 0,
-          leading: IconButton(
-            onPressed: () {},
-            icon: const Icon(
-            Icons.settings_outlined,
-            //Aide à ajouter
-            color: Colors.black,
-            ),
-          ),
-          title: Image.asset(
-            'assets/images/logo.png',
-            height: 70,
-          ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-            Icons.logout,
-            color: Colors.black,
-            ),
-          ),
-        ],
-        ),
+        
         body:
               //PostWidget(),
               //Accueil(),
-              _page[_selectedIndex],
-bottomNavigationBar: BottomNavigationBar(
-        items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home),
-              label:'Accueil',
-              backgroundColor: darkGreen,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label:'Rechercher',
-              backgroundColor: darkGreen,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline),
-              label:'Ajouter article',
-              backgroundColor: darkGreen,
-            ),
-            BottomNavigationBarItem(
-              icon: //Icon(Icons.person_outline),
-              CircleAvatar(backgroundImage: AssetImage('assets/images/profil/1.jpg'),),
-              label:'Profil',
-              backgroundColor: darkGreen
-            ),
-          ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: lightGreen,
-        onTap: _onItemTapped,
-      ),
+              UpBar()
       )
     );
   }
