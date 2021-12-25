@@ -222,7 +222,7 @@ async def post_token(
         return {"token": jwt_token}
     else:
         response = Response()
-        response.set_cookie(key="token", value=jwt_token)
+        response.set_cookie(key="token", value=jwt_token, httponly=True, samesite="None", secure=True)
         return response
 
 
