@@ -226,6 +226,11 @@ async def post_token(
         return response
 
 
+@router.post("/logout")
+async def post_logout(response: Response):
+    response.set_cookie(key="token", value="", httponly=True, samesite="None", secure=True, max_age=0)
+
+
 @router.get("/register", status_code=status.HTTP_201_CREATED)
 async def get_register(
     incription_token: str,
