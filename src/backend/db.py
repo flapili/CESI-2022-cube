@@ -42,3 +42,6 @@ class User(Base, table=True):
     hashed_password: str = Field(nullable=False)
     avatar_id: Optional[int] = Field(foreign_key="attachment.id")
     disabled_at: Optional[datetime.datetime] = Field(sa_column=Column(DateTime(timezone=True)))
+    credential_updated_at: datetime.datetime = Field(
+        sa_column=Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    )

@@ -11,6 +11,7 @@ from jose import jwt, exceptions as jose_exceptions
 from fastapi import HTTPException, status, Security, Depends
 from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse
 
 # from pydantic import BaseModel
 from sqlmodel import select
@@ -111,5 +112,12 @@ async def get_user(
 
     if user.disabled_at is not None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"message": "user disabled"})
+
+    if user.credential_updated_at > jwt_body.iat:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail={"message": "credentials changed, you must relogin"},
+            headers={"Set-Cookie": 'token=""; Max-Age=1; SameSite=None; Secure; Path=/'},
+        )
 
     return user
