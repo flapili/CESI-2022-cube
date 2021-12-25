@@ -96,6 +96,7 @@ class GetMeResponse(BaseModel):
     email: EmailStr
     phone_number: str
     created_at: datetime.datetime
+    updated_at: datetime.datetime
     birthday: datetime.datetime
     has_avatar: bool
 
@@ -142,7 +143,10 @@ async def post_me_avatar(
     session: AsyncSession = Depends(get_session),
 ):
     """Permet d'éditer sa photo de profil."""
-    if Path(avatar.filename).suffix not in (".png", ".jpeg"):
+    ext = Path(avatar.filename).suffix.lower()
+    if ext == ".jpg":
+        ext = ".jpeg"
+    if ext not in (".png", ".jpeg"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="bad file extension")
 
     try:
@@ -166,7 +170,7 @@ async def post_me_avatar(
             await session.refresh(attachment)
             im.save(
                 fp=Path("attachments") / attachment.filename,
-                format=Path(attachment.name).suffix.lstrip("."),
+                format=ext.lstrip("."),
             )
 
             async with session.begin_nested() as tr:
