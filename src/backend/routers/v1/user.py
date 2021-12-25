@@ -42,7 +42,7 @@ class PostResponse409(BaseModel):
 
 
 @router.post(
-    "/",
+    "",
     status_code=status.HTTP_202_ACCEPTED,
     responses={
         status.HTTP_202_ACCEPTED: {
@@ -180,14 +180,14 @@ async def post_me_avatar(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="bad file")
 
 
-class PostTokenBody(BaseModel):
+class PostLoginBody(BaseModel):
     email: EmailStr
     password: str
 
 
-@router.post("/token")
-async def post_token(
-    body: PostTokenBody,
+@router.post("/login")
+async def post_login(
+    body: PostLoginBody,
     token_in_body: bool = False,
     settings: Settings = Depends(get_settings),
     session: AsyncSession = Depends(get_session),
