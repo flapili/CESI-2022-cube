@@ -96,7 +96,7 @@ class GetMeResponse(BaseModel):
     email: EmailStr
     phone_number: str
     created_at: datetime.datetime
-    birthdate: datetime.datetime
+    birthday: datetime.datetime
     has_avatar: bool
 
 
