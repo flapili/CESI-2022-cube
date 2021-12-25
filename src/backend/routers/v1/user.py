@@ -143,10 +143,10 @@ async def post_me_avatar(
     session: AsyncSession = Depends(get_session),
 ):
     """Permet d'éditer sa photo de profil."""
-    ext = Path(avatar.filename).suffix.lower()
-    if ext == ".jpg":
-        ext = ".jpeg"
-    if ext not in (".png", ".jpeg"):
+    ext = Path(avatar.filename).suffix.lower().lstrip(".")
+    if ext == "jpg":
+        ext = "jpeg"
+    if ext not in ("png", "jpeg"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="bad file extension")
 
     try:
@@ -168,10 +168,7 @@ async def post_me_avatar(
                 await tr.commit()
 
             await session.refresh(attachment)
-            im.save(
-                fp=Path("attachments") / attachment.filename,
-                format=ext.lstrip("."),
-            )
+            im.save(fp=Path("attachments") / attachment.filename, format=ext)
 
             async with session.begin_nested() as tr:
                 query = update(db.User).where(db.User.id == me.id).values(avatar_id=attachment.id)
