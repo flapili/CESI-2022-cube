@@ -11,17 +11,23 @@ settings = get_settings()
 Path("attachments").mkdir(exist_ok=True)
 
 app = FastAPI()
-cors_origins = [settings.front_deployment_domain]
-if settings.mode == "development":
-    cors_origins.append("http://localhost:8000")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if settings.mode == "development":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"https?://.*",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.front_deployment_domain],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 
 for router in Path("routers").glob("**/*.py"):
