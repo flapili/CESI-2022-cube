@@ -11,7 +11,6 @@ from jose import jwt, exceptions as jose_exceptions
 from fastapi import HTTPException, status, Security, Depends
 from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import JSONResponse
 
 # from pydantic import BaseModel
 from sqlmodel import select
