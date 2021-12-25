@@ -1,4 +1,5 @@
 # coding: utf-8
+import time
 import zoneinfo
 import datetime
 from pathlib import Path
@@ -70,7 +71,7 @@ async def post(
     if email_already_used.scalar() is True:
         return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"message": "Email already used"})
 
-    now = datetime.datetime.utcnow().timestamp()
+    now = time.time()
     jwt_body = {
         "firstname": body.firstname,
         "lastname": body.lastname,
@@ -210,7 +211,7 @@ async def post_login(
     if user.disabled_at is not None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"message": "disabled user"})
 
-    now = datetime.datetime.utcnow().timestamp()
+    now = time.time()
     jwt_body = {
         "email": user.email,
         "user_id": user.id,
