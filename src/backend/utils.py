@@ -99,7 +99,7 @@ def get_jwt_body(token: str = Depends(get_jwt_token)) -> JWTBody:
 
 
 async def get_user(
-    jwt_body: int = Depends(get_jwt_body),
+    jwt_body: JWTBody = Depends(get_jwt_body),
     session: AsyncSession = Depends(get_session),
 ) -> db.User:
     query = select(db.User).where(db.User.id == jwt_body.user_id).limit(1)
