@@ -70,7 +70,7 @@
     <q-card class="sm:tw-w-2/3">
       <q-card-section class="tw-bg-primary tw-text-center tw-font-bold tw-text-2xl"> Mon profil </q-card-section>
       <q-card-section>
-        <div class="tw-flex">
+        <div class="tw-flex sm:tw-flex-row tw-flex-col">
           <div class="tw-flex tw-flex-col tw-items-center">
             <q-file v-model="profileAvatarFile" class="tw-hidden" ref="profileAvatarUploadRef" accept="image/png, image/jpeg" />
             <q-avatar class="tw-h-16 tw-w-16 tw-cursor-pointer tw-rounded" :class="{ 'tw-bg-gray-400': !me.has_avatar }" @click="openProfileAvatarUpload" square>
@@ -80,11 +80,13 @@
             </q-avatar>
             <q-btn class="tw-mt-4" :disabled="!profileAvatarData" :loading="uploadNewAvatarLoading" @click="uploadNewAvatar">Sauvegarder</q-btn>
           </div>
-          <q-separator vertical class="tw-mx-4" />
+          <q-separator vertical class="tw-mx-4 tw-hidden sm:tw-block" />
+          <q-separator class="tw-my-4 sm:tw-hidden tw-block " />
           <div class="tw-w-full">
-            <div class="tw-break-all">{{ me.firstname }}</div>
-            <div class="tw-break-all">{{ me.lastname }}</div>
-            <div class="tw-break-all">{{ me.email }}</div>
+            <div v-if="me.type != 'user'" class="tw-break-all">rôle: {{ me.type }}</div>
+            <div class="tw-break-all">Prénom: {{ me.firstname }}</div>
+            <div class="tw-break-all">nom: {{ me.lastname }}</div>
+            <div class="tw-break-all">email: {{ me.email }}</div>
             <q-btn class="tw-mt-4" @click="resetPassword(me.email)">Changer de mot de passe</q-btn>
           </div>
         </div>
@@ -281,7 +283,6 @@ export default defineComponent({
       }
       const reader = new FileReader();
       reader.onload = (e) => {
-        console.log(profileAvatarFile.value);
         profileAvatarData.value = e.target.result;
       };
       reader.readAsDataURL(profileAvatarFile.value);
