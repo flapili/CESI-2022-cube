@@ -11,7 +11,6 @@ from fastapi import Depends, HTTPException, status, APIRouter, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 
-
 import db
 from settings import get_settings, Settings
 from utils import get_session, AsyncSession, send_mail, hash_password, get_templates

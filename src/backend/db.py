@@ -5,7 +5,7 @@ from uuid import uuid4
 from typing import Optional
 
 from pydantic import constr
-from sqlmodel import Field, SQLModel, Column, DateTime, func, CheckConstraint, UniqueConstraint, Enum
+from sqlmodel import Field, SQLModel, Column, DateTime, func, CheckConstraint, UniqueConstraint, Enum, Index
 
 import const
 
@@ -39,7 +39,11 @@ class UserType(str, enum.Enum):
 
 class User(Base, table=True):
     __tablename__ = "user"
-    __table_args__ = (UniqueConstraint("email"), UniqueConstraint("phone_number"))
+    __table_args__ = (
+        UniqueConstraint("email"),
+        UniqueConstraint("phone_number"),
+        Index("ix_search_user_tsv", func.to_tsvector("english", "firstname || lastname"), postgresql_using="gin"),
+    )
 
     firstname: constr(max_length=32) = Field(nullable=False)
     lastname: constr(max_length=32) = Field(nullable=False)
@@ -52,4 +56,4 @@ class User(Base, table=True):
     credential_updated_at: datetime.datetime = Field(
         sa_column=Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     )
-    type: UserType = Field(sa_column=Column(Enum(UserType), server_default=UserType.user), nullable=False)
+    type: UserType = Field(sa_column=Column(Enum(UserType), server_default=UserType.user, nullable=False))

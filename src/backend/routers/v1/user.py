@@ -3,12 +3,12 @@ import time
 import zoneinfo
 import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 import premailer
 from pydantic import BaseModel, EmailStr, constr
 from PIL import Image, ExifTags, UnidentifiedImageError
-from sqlmodel import select, update
+from sqlmodel import select, update, or_, func
 from sqlalchemy import exc as sqlalchemy_exc
 from jose import jwt, exceptions as jose_exceptions
 from fastapi import Depends, HTTPException, status, APIRouter, BackgroundTasks, UploadFile, File
@@ -281,6 +281,45 @@ async def post_register(
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"message": "email already used"})
 
     return {"firstname": firstname}
+
+
+class GetUserSearchResponseUser(BaseModel):
+    firstname: str
+    lastname: str
+    created_at: datetime.datetime
+    birthday: datetime.datetime
+    type: str
+    has_avatar: bool
+
+
+class GetUserSearchResponse(BaseModel):
+    users: List[GetUserSearchResponseUser]
+
+
+@router.get("/search", dependencies=[Depends(get_user)], response_model=GetUserSearchResponse)
+async def get_search(
+    query_search: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Recherche les 10 premiers résultats d'une recherche dans le nom ou prénom"""
+    query_search = query_search.lower()
+    query = (
+        select(db.User)
+        .where(
+            or_(
+                func.lower(db.User.firstname).like(f"%{query_search}%"),
+                func.lower(db.User.lastname).like(f"%{query_search}%"),
+            )
+        )
+        .order_by(db.User.created_at)
+        .limit(10)
+    )
+    users_res = await session.execute(query)
+    users = [u.dict() for u in users_res.scalars().all()]
+    for user in users:
+        user["has_avatar"] = bool(user["avatar_id"])
+
+    return {"users": users}
 
 
 class GetUserByIdResponse(BaseModel):
