@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">ReLation-ReLationelle</string>
-    <string name="title_activity_main">ReLation-ReLationelle</string>
+    <string name="app_name">Ressource-ReLationelle</string>
+    <string name="title_activity_main">Ressource-ReLationelle</string>
     <string name="package_name">fr.flapili.cesi.cube</string>
     <string name="custom_url_scheme">fr.flapili.cesi.cube</string>
 </resources>

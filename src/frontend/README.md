@@ -1,4 +1,4 @@
-# ReLation-ReLationelle (frontend_benoit)
+# Ressource-ReLationelle (frontend_benoit)
 
 A Quasar Framework app
 
