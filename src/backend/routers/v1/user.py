@@ -101,6 +101,7 @@ class GetMeResponse(BaseModel):
     created_at: datetime.datetime
     updated_at: datetime.datetime
     birthday: datetime.datetime
+    type: str
     has_avatar: bool
 
 
@@ -287,6 +288,7 @@ class GetUserByIdResponse(BaseModel):
     lastname: str
     created_at: datetime.datetime
     birthday: datetime.datetime
+    type: str
     has_avatar: bool
 
 
