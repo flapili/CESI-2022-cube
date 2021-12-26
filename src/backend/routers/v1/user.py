@@ -7,7 +7,7 @@ from typing import Optional
 
 import premailer
 from pydantic import BaseModel, EmailStr, constr
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ExifTags, UnidentifiedImageError
 from sqlmodel import select, update
 from sqlalchemy import exc as sqlalchemy_exc
 from jose import jwt, exceptions as jose_exceptions
@@ -154,16 +154,23 @@ async def post_me_avatar(
 
     try:
         with Image.open(avatar.file) as im:
+            # im = ImageOps.contain(im, (1024, 1024))
             width, height = im.size
-            if width > 1024:
-                raise HTTPException(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="width can't exceed 1024px"
-                )
+            if width > 1024 or height > 1024:
+                im.thumbnail((1024, 1024))
 
-            if height > 1024:
-                raise HTTPException(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="height can't exceed 1024px"
-                )
+            for orientation in ExifTags.TAGS:
+                if ExifTags.TAGS[orientation] == "Orientation":
+                    break
+
+            exif = im._getexif()
+            if exif is not None:
+                if exif[orientation] == 3:
+                    im = im.rotate(180, expand=True)
+                elif exif[orientation] == 6:
+                    im = im.rotate(270, expand=True)
+                elif exif[orientation] == 8:
+                    im = im.rotate(90, expand=True)
 
             async with session.begin_nested() as tr:
                 attachment = db.Attachment(name=avatar.filename)
