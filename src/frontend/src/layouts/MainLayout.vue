@@ -101,8 +101,8 @@
         <div class="tw-hidden sm:tw-block tw-ml-4">
           <q-btn-group class="tw-rounded-lg">
             <template v-for="(item, n) in menu" :key="n">
-              <q-separator v-if="n" vertical />
-              <q-btn class="tw-bg-blue-400 tw-px-4 tw-py-2" :icon="item.icon" :to="item.to" :aria-label="item.label">{{ item.label }}</q-btn>
+              <q-separator v-if="n > 0" vertical />
+              <q-btn class="tw-bg-blue-400 tw-px-4 tw-py-2" :icon="item.icon" :to="item.to" :aria-label="item.label" :disabled="route.path === item.to">{{ item.label }}</q-btn>
             </template>
           </q-btn-group>
         </div>
@@ -148,7 +148,7 @@
       <q-btn-group spread>
         <template v-for="(item, n) in menu" :key="n">
           <q-separator v-if="n" vertical />
-          <q-btn :icon="item.icon" :to="item.to" :aria-label="item.label">{{ item.label }}</q-btn>
+          <q-btn :icon="item.icon" :to="item.to" :aria-label="item.label" :disabled="route.path === item.to">{{ item.label }}</q-btn>
         </template>
       </q-btn-group>
     </q-footer>
@@ -157,7 +157,7 @@
 
 <script>
 import { defineComponent, ref, computed, reactive, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { useQuasar, date } from "quasar";
 
@@ -179,6 +179,7 @@ export default defineComponent({
     const store = useStore();
     const $q = useQuasar();
     const router = useRouter();
+    const route = useRoute();
 
     const loginDialog = ref(false);
     const email = ref("");
@@ -337,6 +338,7 @@ export default defineComponent({
     }
 
     return {
+      route,
       isValidEmail,
       isValidPhoneNumber,
       apiBaseURL,
