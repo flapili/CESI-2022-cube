@@ -1,10 +1,11 @@
 # coding: utf-8
 import datetime
+import enum
 from uuid import uuid4
 from typing import Optional
 
 from pydantic import constr
-from sqlmodel import Field, SQLModel, Column, DateTime, func, CheckConstraint, UniqueConstraint
+from sqlmodel import Field, SQLModel, Column, DateTime, func, CheckConstraint, UniqueConstraint, Enum
 
 import const
 
@@ -30,6 +31,12 @@ class Attachment(Base, table=True):
     filename: str = Field(nullable=False, default_factory=lambda: str(uuid4()))
 
 
+class UserType(str, enum.Enum):
+    user = "user"
+    moderator = "moderator"
+    admin = "admin"
+
+
 class User(Base, table=True):
     __tablename__ = "user"
     __table_args__ = (UniqueConstraint("email"), UniqueConstraint("phone_number"))
@@ -45,3 +52,4 @@ class User(Base, table=True):
     credential_updated_at: datetime.datetime = Field(
         sa_column=Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     )
+    type: UserType = Field(sa_column=Column(Enum(UserType), server_default=UserType.user), nullable=False)
