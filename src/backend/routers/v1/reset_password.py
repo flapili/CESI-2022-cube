@@ -123,7 +123,7 @@ async def post_send_mail(
     jwt_token = jwt.encode(jwt_body, settings.jwt_secret.get_secret_value(), algorithm="HS256")
     reset_link = f"{settings.front_deployment_domain}/reset_password?token={jwt_token}"
     template = templates.get_template("reset_password.html")
-    content_html = template.render(reset_link=reset_link)
+    content_html = template.render(reset_link=reset_link, api_base_url=settings.api_deployment_domain)
     content_html = premailer.transform(content_html)
     tasks.add_task(send_mail, to=body.email, content_html=content_html, subject="Réinitialisation de mot de passe")
     return {"message": "link sent by email"}
