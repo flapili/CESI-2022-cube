@@ -1,0 +1,10 @@
+{
+  "appId": "fr.flapili.cesi.cube",
+  "appName": "ReLation-ReLationelle",
+  "bundledWebRuntime": false,
+  "npmClient": "yarn",
+  "webDir": "www",
+  "server": {
+    "url": "http://192.168.122.34:8000"
+  }
+}
