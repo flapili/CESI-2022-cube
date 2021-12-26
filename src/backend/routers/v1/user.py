@@ -264,6 +264,7 @@ async def post_register(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "invalid token"})
 
     user = db.User(**jwt_body)
+    firstname = user.firstname
     async with session.begin():
         session.add(user)
         try:
@@ -271,7 +272,7 @@ async def post_register(
         except sqlalchemy_exc.IntegrityError:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"message": "email already used"})
 
-    return {"firstname": user.firstname}
+    return {"firstname": firstname}
 
 
 class GetUserByIdResponse(BaseModel):
