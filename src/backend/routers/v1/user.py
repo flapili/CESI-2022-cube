@@ -12,7 +12,7 @@ from sqlmodel import select, update
 from sqlalchemy import exc as sqlalchemy_exc
 from jose import jwt, exceptions as jose_exceptions
 from fastapi import Depends, HTTPException, status, APIRouter, BackgroundTasks, UploadFile, File
-from fastapi.responses import JSONResponse, Response, FileResponse
+from fastapi.responses import JSONResponse, Response, FileResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 
@@ -85,7 +85,9 @@ async def post(
     jwt_token = jwt.encode(jwt_body, settings.jwt_secret.get_secret_value(), algorithm="HS256")
     activation_link = f"{settings.api_deployment_domain}/v1/user/register?incription_token={jwt_token}"
     template = templates.get_template("welcome.html")
-    content_html = template.render(firstname=body.firstname, activation_link=activation_link)
+    content_html = template.render(
+        firstname=body.firstname, activation_link=activation_link, api_base_url=settings.api_deployment_domain
+    )
     content_html = premailer.transform(content_html)
     tasks.add_task(send_mail, to=body.email, content_html=content_html, subject=f"Bienvenue {body.lastname}")
     return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content={"message": "Invitation sent by email"})
@@ -233,9 +235,21 @@ async def post_logout(response: Response):
     response.set_cookie(key="token", value="", httponly=True, samesite="None", secure=True, max_age=0)
 
 
-@router.get("/register", status_code=status.HTTP_201_CREATED)
+@router.get("/register")
 async def get_register(
     incription_token: str,
+    settings: Settings = Depends(get_settings),
+):
+    return RedirectResponse(f"{settings.front_deployment_domain}/welcome?token={incription_token}")
+
+
+class PostRegisterBody(BaseModel):
+    token: str
+
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+async def post_register(
+    body: PostRegisterBody,
     settings: Settings = Depends(get_settings),
     session: AsyncSession = Depends(get_session),
 ):
@@ -243,23 +257,21 @@ async def get_register(
     Ne devrait être appelé que par le lien du mail d'inscription.
     """
     try:
-        body = jwt.decode(incription_token, settings.jwt_secret.get_secret_value(), algorithms="HS256")
+        jwt_body = jwt.decode(body.token, settings.jwt_secret.get_secret_value(), algorithms="HS256")
     except jose_exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_410_GONE, detail={"message": "invalid token (too old)"})
     except jose_exceptions.JWTError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "invalid token"})
 
-    user = db.User(**body)
+    user = db.User(**jwt_body)
     async with session.begin():
         session.add(user)
         try:
             await session.commit()
         except sqlalchemy_exc.IntegrityError:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail={"message": "email already used"}
-            )  # TODO return on app
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"message": "email already used"})
 
-    return "created"  # TODO return on app
+    return {"firstname": user.firstname}
 
 
 class GetUserByIdResponse(BaseModel):
