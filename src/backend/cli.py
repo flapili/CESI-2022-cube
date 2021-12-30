@@ -1,4 +1,5 @@
 # coding: utf-8
+import zoneinfo
 import datetime
 from typing import List
 
@@ -55,6 +56,41 @@ def user_create(
         session.add(user)
         session.commit()
     typer.secho(f"added user '{firstname} {lastname}'", fg="green")
+
+
+@user_app.command("fake")
+def user_fake(
+    n: int = typer.Argument(..., help="Nombre d'utilisateur à générer"),
+):
+    if n < 1:
+        typer.secho("n must be greater than 0", fg="red")
+        typer.Exit(1)
+
+    import random
+    import faker
+
+    fake = faker.Faker(locale="fr-FR")
+
+    with Session(engine) as session:
+        for _ in range(n):
+            firstname = fake.first_name()
+            lastname = fake.last_name()
+            session.add(
+                db.User(
+                    firstname=firstname,
+                    lastname=lastname,
+                    email=f"contact.flapili+fake{firstname}{lastname}@gmail.com",
+                    phone_number=f"06 {random.randint(0, 99):02} {random.randint(0, 99):02} {random.randint(0, 99):02} {random.randint(0, 99):02}",  # noqa
+                    hashed_password=hash_password("fake"),
+                    birthday=datetime.datetime.combine(
+                        fake.date_of_birth(tzinfo=zoneinfo.ZoneInfo("UTC"), minimum_age=13, maximum_age=70),
+                        datetime.datetime.min.time(),
+                    ),
+                )
+            )
+
+        session.commit()
+    typer.secho(f"added {n} fake user", fg="green")
 
 
 if __name__ == "__main__":
