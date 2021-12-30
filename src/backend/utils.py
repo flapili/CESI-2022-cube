@@ -110,7 +110,7 @@ async def get_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"message": "user not found, try relogin"})
 
     if user.disabled_at is not None:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"message": "user disabled"})
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"message": "banned user"})
 
     if user.credential_updated_at > jwt_body.iat:
         raise HTTPException(
@@ -120,3 +120,13 @@ async def get_user(
         )
 
     return user
+
+
+def check_is_moderator(me: db.User = Depends(get_user)):
+    if me.type not in (db.UserType.moderator, db.UserType.admin):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"message": "need moderator right"})
+
+
+def check_is_admin(me: db.User = Depends(get_user)):
+    if me.type != db.UserType.admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"message": "need admin right"})

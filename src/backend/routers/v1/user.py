@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional, List
 
 import premailer
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, EmailStr, constr, conint, PositiveInt
 from PIL import Image, ExifTags, UnidentifiedImageError
 from sqlmodel import select, update, or_, func
 from sqlalchemy import exc as sqlalchemy_exc
@@ -19,10 +19,63 @@ from fastapi.templating import Jinja2Templates
 import db
 import const
 from settings import get_settings, Settings
-from utils import get_session, AsyncSession, send_mail, hash_password, get_templates, get_user
+from utils import (
+    check_is_moderator,
+    check_is_admin,
+    get_session,
+    AsyncSession,
+    send_mail,
+    hash_password,
+    get_templates,
+    get_user,
+)
 
 
 router = APIRouter()
+
+
+class GetResponseUser(BaseModel):
+    id: PositiveInt
+    firstname: str
+    lastname: str
+    email: EmailStr
+    phone_number: str
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    disabled_at: Optional[datetime.datetime]
+    birthday: datetime.datetime
+    type: str
+    has_avatar: bool
+
+
+class GetResponseMeta(BaseModel):
+    page: PositiveInt
+    per_page: PositiveInt
+    total: conint(ge=0)
+
+
+class GetResponse(BaseModel):
+    users: List[GetResponseUser]
+    meta: GetResponseMeta
+
+
+@router.get("", dependencies=[Depends(check_is_moderator)], response_model=GetResponse)
+async def get(
+    page: PositiveInt = 1,
+    session: AsyncSession = Depends(get_session),
+):
+    per_page: PositiveInt = 10
+    async with session.begin_nested():
+        query = select(db.User).offset((page - 1) * per_page).limit(per_page)
+        users_res = await session.execute(query)
+        query_total = select(func.count(db.User.id))
+        total_user_res = await session.execute(query_total)
+        users = [dict(u) for u in users_res.scalars()]
+
+        for user in users:
+            user["has_avatar"] = bool(user["avatar_id"])
+
+        return {"users": users, "meta": {"page": page, "per_page": per_page, "total": total_user_res.scalar()}}
 
 
 class PostBody(BaseModel):
@@ -48,7 +101,7 @@ class PostResponse409(BaseModel):
     responses={
         status.HTTP_202_ACCEPTED: {
             "model": PostResponse202,
-            "description": "Invitation envoyé par email",
+            "description": "Invitation envoyée par email",
             "content": {"application/json": {"example": {"message": "Invitation sent by email"}}},
         },
         status.HTTP_409_CONFLICT: {
@@ -94,6 +147,7 @@ async def post(
 
 
 class GetMeResponse(BaseModel):
+    id: PositiveInt
     firstname: str
     lastname: str
     email: EmailStr
@@ -284,6 +338,7 @@ async def post_register(
 
 
 class GetUserSearchResponseUser(BaseModel):
+    id: PositiveInt
     firstname: str
     lastname: str
     created_at: datetime.datetime
@@ -296,10 +351,11 @@ class GetUserSearchResponse(BaseModel):
     users: List[GetUserSearchResponseUser]
 
 
-@router.get("/search", dependencies=[Depends(get_user)], response_model=GetUserSearchResponse)
+@router.get("/search", response_model=GetUserSearchResponse)
 async def get_search(
     query_search: str,
     session: AsyncSession = Depends(get_session),
+    me: db.User = Depends(get_user),
 ):
     """Recherche les 10 premiers résultats d'une recherche dans le nom ou prénom"""
     query_search = query_search.lower()
@@ -311,6 +367,8 @@ async def get_search(
                 func.lower(db.User.lastname).like(f"%{query_search}%"),
             )
         )
+        .where(db.User.id != me.id)
+        .where(db.User.disabled_at == None)  # noqa: E711
         .order_by(db.User.created_at)
         .limit(10)
     )
@@ -323,6 +381,7 @@ async def get_search(
 
 
 class GetUserByIdResponse(BaseModel):
+    id: PositiveInt
     firstname: str
     lastname: str
     created_at: datetime.datetime
@@ -345,6 +404,57 @@ async def get_by_id(
     user = user.dict()
     user["has_avatar"] = bool(user["avatar_id"])
     return user
+
+
+@router.post("/{user_id}/ban", dependencies=[Depends(check_is_moderator)])
+async def ban_by_id(
+    user_id: int,
+    me: db.User = Depends(get_user),
+    session: AsyncSession = Depends(get_session),
+):
+    """Ban un utilisateur donné."""
+    if me.id == user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "can't ban yourself"})
+
+    user_res = await session.execute(select(db.User).where(db.User.id == user_id).limit(1))
+    user: Optional[db.User] = user_res.scalar()
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+
+    if user.disabled_at is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"message": "user already banned"})
+
+    if user.type == db.UserType.admin:
+        check_is_admin(me)
+
+    query = update(db.User).values(disabled_at=func.now()).where(db.User.id == user_id)
+    await session.execute(query)
+    await session.commit()
+
+
+@router.post("/{user_id}/unban", dependencies=[Depends(check_is_moderator)])
+async def unban_by_id(
+    user_id: int,
+    me: db.User = Depends(get_user),
+    session: AsyncSession = Depends(get_session),
+):
+    """Unban un utilisateur donné."""
+    user_res = await session.execute(select(db.User).where(db.User.id == user_id).limit(1))
+    user: Optional[db.User] = user_res.scalar()
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="user not found")
+
+    if user.disabled_at is None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={"message": "user not banned"})
+
+    if user.type == db.UserType.admin:
+        check_is_admin(me)
+
+    query = update(db.User).values(disabled_at=None).where(db.User.id == user_id)
+    await session.execute(query)
+    await session.commit()
 
 
 @router.get("/{user_id}/avatar", dependencies=[Depends(get_user)])
