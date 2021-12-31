@@ -79,7 +79,7 @@ def user_fake(
                 db.User(
                     firstname=firstname,
                     lastname=lastname,
-                    email=f"contact.flapili+fake{firstname}{lastname}@gmail.com",
+                    email=f"contact.flapili+fake{firstname}{lastname}@gmail.com".replace(" ", ""),
                     phone_number=f"06 {random.randint(0, 99):02} {random.randint(0, 99):02} {random.randint(0, 99):02} {random.randint(0, 99):02}",  # noqa
                     hashed_password=hash_password("fake"),
                     birthday=datetime.datetime.combine(

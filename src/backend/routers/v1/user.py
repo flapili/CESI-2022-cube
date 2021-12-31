@@ -66,7 +66,7 @@ async def get(
 ):
     per_page: PositiveInt = 10
     async with session.begin_nested():
-        query = select(db.User).offset((page - 1) * per_page).limit(per_page)
+        query = select(db.User).order_by(db.User.id).offset((page - 1) * per_page).limit(per_page)
         users_res = await session.execute(query)
         query_total = select(func.count(db.User.id))
         total_user_res = await session.execute(query_total)
