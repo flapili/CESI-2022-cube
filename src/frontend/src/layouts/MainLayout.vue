@@ -1,7 +1,7 @@
 <template>
   <q-dialog v-model="loginDialog" class="tw-rounded-sm">
-    <q-card class="sm:tw-w-1/2">
-      <q-card-section class="tw-bg-primary tw-text-center tw-font-bold tw-text-2xl"> Connexion </q-card-section>
+    <q-card class="sm:tw-w-2/3">
+      <q-card-section class="tw-bg-primary tw-text-center tw-font-bold tw-text-2xl tw-text-white"> Connexion </q-card-section>
       <q-card-section>
         <q-form class="tw-flex tw-flex-col">
           <q-input outlined v-model="email" @keyup.enter="!disabledLogin && login()" label="Adresse email" type="email" />
@@ -10,14 +10,14 @@
               <q-icon :name="showPassword ? 'visibility' : 'visibility_off'" class="cursor-pointer" @click="showPassword = !showPassword" />
             </template>
           </q-input>
-          <q-btn class="tw-mt-2 tw-bg-blue-400" @click="login" :disabled="disabledLogin">Connexion</q-btn>
+          <q-btn class="tw-mt-2 tw-bg-blue-400" @click="login" :disable="disabledLogin">Connexion</q-btn>
         </q-form>
         <div class="tw-flex tw-flex-col">
           <button class="tw-mt-2 tw-text-blue-400 tw-text-center" @click="registerDialog = true">
             Inscription
             <q-dialog v-model="registerDialog" class="tw-rounded-sm">
               <q-card class="sm:tw-w-1/2">
-                <q-card-section class="tw-bg-primary tw-text-center tw-font-bold tw-text-2xl"> Inscription </q-card-section>
+                <q-card-section class="tw-bg-primary tw-text-center tw-font-bold tw-text-2xl tw-text-white"> Inscription </q-card-section>
                 <q-card-section>
                   <q-form ref="refRegisterForm" class="tw-flex tw-flex-col">
                     <q-input outlined v-model="registerForm.firstname" label="Prénom" :rules="[(val) => !!val || 'Prénom manquant']" />
@@ -53,7 +53,7 @@
                     <q-input outlined class="tw-mt-2" v-model="registerForm.birthday" :rules="[(val) => !!val || 'Date invalide']" label="Date de naissance" type="date" />
                     <q-btn-group spread class="tw-mt-2">
                       <q-btn class="tw-bg-yellow-400" @click="resetRegisterForm">Réinitialiser</q-btn>
-                      <q-btn class="tw-bg-blue-400" @click="register" :disabled="disabledRegister">Inscription</q-btn>
+                      <q-btn class="tw-bg-blue-400" @click="register" :disable="disabledRegister">Inscription</q-btn>
                     </q-btn-group>
                   </q-form>
                 </q-card-section>
@@ -68,28 +68,58 @@
 
   <q-dialog v-model="profileDialog" class="tw-rounded-sm">
     <q-card class="sm:tw-w-2/3">
-      <q-card-section class="tw-bg-primary tw-text-center tw-font-bold tw-text-2xl"> Mon profil </q-card-section>
-      <q-card-section>
-        <div class="tw-flex sm:tw-flex-row tw-flex-col">
-          <div class="tw-flex tw-flex-col tw-items-center">
-            <q-file v-model="profileAvatarFile" class="tw-hidden" ref="profileAvatarUploadRef" accept="image/png, image/jpeg" />
-            <q-avatar class="tw-h-16 tw-w-16 tw-cursor-pointer tw-rounded" :class="{ 'tw-bg-gray-400': !me.has_avatar }" @click="openProfileAvatarUpload" square>
-              <img v-if="profileAvatarData" :src="profileAvatarData" alt="photo de profil" />
-              <img v-else-if="me.has_avatar" :src="`${apiBaseURL}/v1/user/me/avatar`" alt="photo de profil" />
-              <template v-else>{{ me.firstname[0] }}{{ me.lastname[0] }}</template>
-            </q-avatar>
-            <q-btn class="tw-mt-4" :disabled="!profileAvatarData" :loading="uploadNewAvatarLoading" @click="uploadNewAvatar">Sauvegarder</q-btn>
-          </div>
-          <q-separator vertical class="tw-mx-4 tw-hidden sm:tw-block" />
-          <q-separator class="tw-my-4 sm:tw-hidden tw-block " />
-          <div class="tw-w-full">
-            <div v-if="me.type != 'user'" class="tw-break-all">rôle: {{ me.type }}</div>
-            <div class="tw-break-all">Prénom: {{ me.firstname }}</div>
-            <div class="tw-break-all">nom: {{ me.lastname }}</div>
-            <div class="tw-break-all">email: {{ me.email }}</div>
-            <q-btn class="tw-mt-4" @click="resetPassword(me.email)">Changer de mot de passe</q-btn>
-          </div>
+      <q-card-section class="tw-bg-primary tw-text-center tw-font-bold tw-text-2xl tw-text-white"> Mon profil </q-card-section>
+      <q-card-section class="tw-flex sm:tw-flex-row tw-flex-col">
+        <div class="tw-flex tw-flex-col tw-items-center">
+          <q-file v-model="profileAvatarFile" class="tw-hidden" ref="profileAvatarUploadRef" accept="image/png, image/jpeg" />
+          <q-avatar class="tw-h-16 tw-w-16 tw-cursor-pointer tw-rounded" :class="{ 'tw-bg-gray-400': !me.has_avatar }" @click="openProfileAvatarUpload" square>
+            <img v-if="profileAvatarData" :src="profileAvatarData" alt="photo de profil" />
+            <img v-else-if="me.has_avatar" :src="`${apiBaseURL}/v1/user/me/avatar`" alt="photo de profil" />
+            <template v-else>{{ me.firstname[0] }}{{ me.lastname[0] }}</template>
+          </q-avatar>
+          <q-btn class="tw-mt-4" :disable="!profileAvatarData" :loading="uploadNewAvatarLoading" @click="uploadNewAvatar">Sauvegarder</q-btn>
         </div>
+        <q-separator vertical class="tw-mx-4 tw-hidden sm:tw-block" />
+        <q-separator class="tw-my-4 sm:tw-hidden tw-block" />
+        <div class="tw-w-full">
+          <div>
+            {{ me.firstname }} {{ me.lastname }} <q-chip v-if="me.type !== 'user'" square class="tw-bg-blue-400 tw-text-white"> {{ me.type }} </q-chip>
+          </div>
+          <div>Rejoint le : {{ new Date(me.created_at).toLocaleDateString() }}</div>
+
+          <div class="tw-break-all">email: {{ me.email }}</div>
+          <q-btn class="tw-mt-4" @click="resetPassword(me.email)">Changer de mot de passe</q-btn>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="searchDialog" class="tw-rounded-sm">
+    <q-card class="sm:tw-w-2/3">
+      <q-card-section class="tw-bg-primary tw-text-center tw-font-bold tw-text-2xl tw-text-white"> Rechercher </q-card-section>
+      <q-card-section class="tw-flex tw-flex-col">
+        <q-input v-model="search.query" :debounce="1000" label="Rechercher" />
+        <div v-if="search.searching" class="tw-flex tw-justify-center">
+          <q-spinner-cube class="tw-text-8xl tw-text-blue-600" />
+        </div>
+        <q-scroll-area v-else-if="search.result.users.length + search.result.posts.length" class="tw-h-64">
+          <q-card v-for="user in search.result.users" :key="user.me" class="tw-flex tw-bg-gray-100 tw-m-4">
+            <q-card-section>
+              <q-avatar class="tw-rounded tw-h-24 tw-w-24" :class="{ 'tw-bg-gray-400': !user.has_avatar }" square>
+                <img v-if="user.has_avatar" :src="`${apiBaseURL}/v1/user/${user.id}/avatar`" alt="avatar" />
+                <template v-else>{{ user.firstname[0] }}{{ user.lastname[0] }}</template>
+              </q-avatar>
+            </q-card-section>
+            <q-card-section>
+              <div>
+                {{ user.firstname }} {{ user.lastname }} <q-chip v-if="user.type !== 'user'" square class="tw-bg-blue-400 tw-text-white"> {{ user.type }} </q-chip>
+              </div>
+              <div>Rejoint le : {{ new Date(user.created_at).toLocaleDateString() }}</div>
+            </q-card-section>
+          </q-card>
+          <q-separator />
+        </q-scroll-area>
+        <div v-else-if="search.query.length">Aucun résultat</div>
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -104,8 +134,10 @@
           <q-btn-group class="tw-rounded-lg">
             <template v-for="(item, n) in menu" :key="n">
               <q-separator v-if="n > 0" vertical />
-              <q-btn class="tw-bg-blue-400 tw-px-4 tw-py-2" :icon="item.icon" :to="item.to" :aria-label="item.label" :disabled="route.path === item.to">{{ item.label }}</q-btn>
+              <q-btn class="tw-bg-blue-400 tw-px-4 tw-py-2" :icon="item.icon" :to="item.to" :aria-label="item.label" :disable="route.path === item.to">{{ item.label }}</q-btn>
             </template>
+            <q-separator vertical />
+            <q-btn class="tw-bg-blue-400 tw-px-4 tw-py-2" @click="searchDialog = true" icon="search" aria-label="Recherche">Recherche</q-btn>
           </q-btn-group>
         </div>
 
@@ -150,8 +182,10 @@
       <q-btn-group spread>
         <template v-for="(item, n) in menu" :key="n">
           <q-separator v-if="n" vertical />
-          <q-btn :icon="item.icon" :to="item.to" :aria-label="item.label" :disabled="route.path === item.to">{{ item.label }}</q-btn>
+          <q-btn :icon="item.icon" :to="item.to" :aria-label="item.label" :disable="route.path === item.to" :class="{ 'tw-text-blue-800': route.path === item.to }" />
         </template>
+        <q-separator vertical />
+        <q-btn @click="searchDialog = true" icon="search" aria-label="Recherche" />
       </q-btn-group>
     </q-footer>
   </q-layout>
@@ -191,16 +225,23 @@ export default defineComponent({
 
     const login = async () => {
       try {
+
         await api.$post("/v1/user/login", { email: email.value, password: password.value });
         const me = await api.$get("/v1/user/me");
         store.commit("auth/setMe", me);
         loginDialog.value = false;
       } catch (error) {
         if (!error.response) {
-          $q.notify({ position: "top", message: "impossible de se connecter. Vérifiez votre connexion internet", type: "negative" });
+          $q.notify({ position: "top", message: "Impossible de se connecter. Vérifiez votre connexion internet", type: "negative" });
           throw error;
+        } else if (error.response.status == 401) {
+          $q.notify({ position: "top", message: "Impossible de se connecter. Vérifiez vos indentifiants", type: "warning" });
+        } else if (error.response.status === 403) {
+          $q.notify({ position: "top", message: "Compte banni", type: "negative" });
+        } else {
+          $q.notify({ position: "top", message: "Erreur inconnue", type: "nagative" });
+          console.error(error);
         }
-        $q.notify({ position: "top", message: "impossible de se connecter. Vérifiez vos indentifiants", type: "warning" });
       }
     };
 
@@ -243,7 +284,7 @@ export default defineComponent({
           email: registerForm.email,
           password: registerForm.password,
           phone_number: registerForm.phoneNumber,
-          birthday: date.extractDate(registerForm.birthday, "DD/MM/YYYY"),
+          birthday: date.extractDate(registerForm.birthday, "YYYY-MM-DD"),
         });
         $q.notify({ position: "top", message: "Un email de confirmation vous a été envoyé", type: "positive" });
         resetRegisterForm();
@@ -267,13 +308,18 @@ export default defineComponent({
       router.go();
     };
 
-    const menu = ref([
-      { label: "Accueil", icon: "home", to: "/" },
-      { label: "todo", icon: "home", to: "/" },
-    ]);
-
     const me = computed(() => store.getters["auth/me"]);
 
+    const menu = computed(() => {
+      const menu = [
+        { label: "Accueil", icon: "home", to: "/" },
+        { label: "todo", icon: "home", to: "/" },
+      ];
+      if (["moderator", "admin"].includes(me.value?.type)) {
+        menu.push({ label: "Utilisateurs", icon: "fas fa-user", to: "/users" });
+      }
+      return menu;
+    });
     const profileDialog = ref(false);
     const profileAvatarFile = ref(null);
     const profileAvatarData = ref(null);
@@ -319,7 +365,7 @@ export default defineComponent({
         await api.$post("/v1/reset_password/send_mail", { email });
         $q.notify({
           position: "top",
-          message: "Un email viens de vous être envoyé",
+          message: "Un email vient de vous être envoyé",
           type: "positive",
         });
       } catch (error) {
@@ -337,6 +383,37 @@ export default defineComponent({
         await resetPassword(email);
       });
     }
+
+    const searchDialog = ref(false);
+    const search = reactive({
+      searching: false,
+      query: "",
+      result: {
+        users: [],
+        posts: [],
+      },
+    });
+
+    watch(
+      () => search.query,
+      async (query_search) => {
+        if (query_search.length === 0) {
+          search.result.users = [];
+        } else {
+          search.searching = true;
+          try {
+            const { users } = await api.$get("/v1/user/search", { params: { query_search } });
+            search.result.users = users;
+          } catch (error) {
+            search.result.users = [];
+            console.error(error);
+          } finally {
+            search.searching = false;
+          }
+        }
+      },
+      { deep: true }
+    );
 
     return {
       route,
@@ -367,6 +444,8 @@ export default defineComponent({
       uploadNewAvatarLoading,
       resetPassword,
       openForgotPasswordDialog,
+      searchDialog,
+      search,
     };
   },
 });
