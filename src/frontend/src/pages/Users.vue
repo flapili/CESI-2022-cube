@@ -30,7 +30,12 @@
           <template v-else-if="props.row.type === 'moderator'"><q-chip class="tw-bg-blue-200" square>Moderateur</q-chip></template>
           <template v-else-if="props.row.type === 'admin'"><q-chip class="tw-bg-green-200" square>Admin</q-chip></template>
         </q-td>
-        <q-td> TODO </q-td>
+        <q-td key="action">
+          <div v-if="props.row.id != me.id">
+            <q-btn v-if="props.row.disabled_at === null" @click="banUser(props.row)" class="tw-bg-red-400">Désactiver</q-btn>
+            <q-btn v-else @click="unbanUser(props.row)" class="tw-bg-green-400">Réactiver</q-btn>
+          </div>
+        </q-td>
       </q-tr>
     </template>
   </q-table>
@@ -40,7 +45,7 @@
 import { defineComponent, ref, computed } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { date } from "quasar";
+import { useQuasar, date } from "quasar";
 import { api, apiBaseURL } from "boot/axios";
 
 export default defineComponent({
@@ -49,6 +54,8 @@ export default defineComponent({
     const router = useRouter();
     const store = useStore();
     const me = computed(() => store.getters["auth/me"]);
+
+    const $q = useQuasar();
 
     const loading = ref(true);
     const users = ref([]);
@@ -65,9 +72,9 @@ export default defineComponent({
       { name: "email", label: "email", align: "left" },
       { name: "phoneNumber", label: "Téléphone", align: "left" },
       { name: "age", label: "Âge", align: "left" },
-      // { name: "birthday", label: "Né le", align: "left" },
       { name: "createdAt", label: "Créé le", align: "left" },
       { name: "type", label: "Type", align: "left" },
+      { name: "action", label: "Action", align: "left" },
     ];
 
     const fetchUsers = async (page = 1) => {
@@ -97,6 +104,36 @@ export default defineComponent({
       fetchUsers(props.pagination.page);
     };
 
+    const banUser = (user) => {
+      $q.dialog({
+        message: `Êtes-vous sûr de vouloir désactiver ${user.firstname} ${user.lastname} ?`,
+        cancel: true,
+      }).onOk(async () => {
+        try {
+          await api.$post(`/v1/user/${user.id}/ban`);
+          $q.notify({ position: "top", message: "Utilisateur désactivé", type: "positive" });
+          await fetchUsers(pagination.value.page)
+        } catch (error) {
+          $q.notify({ position: "top", message: "Erreur", type: "negative" });
+        }
+      });
+    };
+
+    const unbanUser = (user) => {
+      $q.dialog({
+        message: `Êtes-vous sûr de vouloir réactiver ${user.firstname} ${user.lastname} ?`,
+        cancel: true,
+      }).onOk(async () => {
+        try {
+          await api.$post(`/v1/user/${user.id}/unban`);
+          $q.notify({ position: "top", message: "Utilisateur réactivé", type: "positive" });
+          await fetchUsers(pagination.value.page)
+        } catch (error) {
+          $q.notify({ position: "top", message: "Erreur", type: "negative" });
+        }
+      });
+    };
+
     await fetchUsers();
 
     return {
@@ -107,6 +144,8 @@ export default defineComponent({
       pagination,
       columns,
       onRequest,
+      banUser,
+      unbanUser,
     };
   },
 });
