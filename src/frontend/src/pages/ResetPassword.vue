@@ -25,7 +25,7 @@
 
 <script>
 import { defineComponent, ref, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 
 import { api } from "boot/axios";
@@ -35,6 +35,8 @@ export default defineComponent({
   async setup() {
     const route = useRoute();
     const token = route.query.token;
+
+    const router = useRouter();
 
     const $q = useQuasar();
 
@@ -54,6 +56,9 @@ export default defineComponent({
     const resetPassword = async () => {
       await api.$post("/v1/reset_password", { token, password: password.value });
       $q.notify({ position: "top", message: "Mot de passe changé", type: "positive" });
+      setTimeout(()=> {
+        router.push("/")
+      }, 1000)
     };
     return {
       tokenIsValid,
