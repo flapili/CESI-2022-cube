@@ -1,31 +1,16 @@
 <template>
-  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
-    <div>
-      <div style="font-size: 30vh">
-        404
-      </div>
-
-      <div class="text-h2" style="opacity:.4">
-        Oops. Nothing here...
-      </div>
-
-      <q-btn
-        class="q-mt-xl"
-        color="white"
-        text-color="blue"
-        unelevated
-        to="/"
-        label="Go Home"
-        no-caps
-      />
+  <div class="tw-h-screen tw-w-screen tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-blue-400">
+    <div class="tw-text-white tw-text-2xl tw-px-16">
+      Oups. Il n'y a rien par ici
     </div>
+    <q-btn icon="home" to="/" class="tw-bg-white tw-text-blue-500 tw-mt-4 tw-text-xl">Accueil</q-btn>
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: 'Error404'
-})
+  name: "Error404",
+});
 </script>
