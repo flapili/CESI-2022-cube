@@ -35,6 +35,7 @@ class UserType(str, enum.Enum):
     user = "user"
     moderator = "moderator"
     admin = "admin"
+    super_admin = "super admin"
 
 
 class User(Base, table=True):
@@ -57,3 +58,53 @@ class User(Base, table=True):
         sa_column=Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     )
     type: UserType = Field(sa_column=Column(Enum(UserType), server_default=UserType.user, nullable=False))
+
+
+class PostCategorie(str, enum.Enum):
+    communication = "communication"
+    culture = "culture"
+    personal_development = "personal_development"
+    emotional_intelligence = "emotional_intelligence"
+    hobbie = "hobbie"
+    professional_world = "professional_world"
+    parenting = "parenting"
+    quality_of_life = "quality_of_life"
+    search_of_meaning = "search_of_meaning"
+    physical_health = "physical_health"
+    spirituality = "spirituality"
+    emotional_life = "emotional_life"
+
+
+class Post(Base, table=True):
+    __tablename__ = "post"
+    __table_args__ = (
+        CheckConstraint(
+            """
+            related_to_itself OR
+            related_to_spouse OR
+            related_to_familly OR
+            related_to_work OR
+            related_to_friend_and_community OR
+            related_to_everyone = TRUE
+            """
+        ),
+    )
+
+    title: str = Field(nullable=False)
+    type: PostCategorie = Field(sa_column=Column(Enum(PostCategorie), nullable=False))
+    author_id: int = Field(foreign_key="user.id", nullable=False)
+    related_to_itself: bool = Field(default=False)
+    related_to_spouse: bool = Field(default=False)
+    related_to_familly: bool = Field(default=False)
+    related_to_work: bool = Field(default=False)
+    related_to_friend_and_community: bool = Field(default=False)
+    related_to_everyone: bool = Field(default=False)
+    content: str = Field(nullable=False)
+
+
+class UserHavePostInFavotite(Base, table=True):
+    __tablename__ = "user_have_post_in_favorite"
+    __table_args__ = (UniqueConstraint("user_id", "post_id", "deleted_at"),)
+
+    user_id: int = Field(foreign_key="user.id", nullable=False)
+    post_id: int = Field(foreign_key="post.id", nullable=False)
