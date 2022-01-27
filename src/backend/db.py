@@ -93,6 +93,7 @@ class Post(Base, table=True):
     title: str = Field(nullable=False)
     type: PostCategorie = Field(sa_column=Column(Enum(PostCategorie), nullable=False))
     author_id: int = Field(foreign_key="user.id", nullable=False)
+    attachment_id: int = Field(foreign_key="attachment.id", nullable=True)
     related_to_itself: bool = Field(default=False)
     related_to_spouse: bool = Field(default=False)
     related_to_familly: bool = Field(default=False)
