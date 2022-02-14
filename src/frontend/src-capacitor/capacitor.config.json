@@ -1,0 +1,7 @@
+{
+  "appId": "fr.flapili.cesi.cube",
+  "appName": "Ressource-Relationelle",
+  "bundledWebRuntime": false,
+  "npmClient": "yarn",
+  "webDir": "www"
+}
