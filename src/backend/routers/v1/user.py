@@ -457,7 +457,7 @@ async def unban_by_id(
     await session.commit()
 
 
-@router.get("/{user_id}/avatar", dependencies=[Depends(get_user)])
+@router.get("/{user_id}/avatar")
 async def get_by_id_avatar(
     user_id: int,
     session: AsyncSession = Depends(get_session),

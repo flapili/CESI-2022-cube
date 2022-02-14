@@ -68,7 +68,6 @@ async def post(
         .where(db.User.email == jwt_body["email"])
         .where(db.User.credential_updated_at < datetime.datetime.fromtimestamp(jwt_body["iat"]))
     )
-    print(query)
     res = await session.execute(query)
     await session.commit()
     if res.rowcount == 0:
