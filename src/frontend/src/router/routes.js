@@ -8,6 +8,12 @@ const routes = [
       { path: '/users', component: () => import('pages/Users.vue') },
     ]
   },
+  {
+    path: "/login", component: () => import("layouts/SignInOrLoginLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/SignInOrLogin.vue") }
+    ]
+  },
 
   { path: '/error', component: () => import('pages/Error/ErrorWithMessage.vue') },
   { path: '/welcome', component: () => import('pages/Welcome.vue') },
