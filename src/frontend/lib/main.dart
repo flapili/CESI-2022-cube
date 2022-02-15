@@ -43,10 +43,9 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         backgroundColor: lightGreen,
         
-        body:
+        body: UpBar()
               //PostWidget(),
               //Accueil(),
-              UpBar()
       )
     );
   }

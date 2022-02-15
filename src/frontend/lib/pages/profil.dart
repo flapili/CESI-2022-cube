@@ -110,7 +110,7 @@ class _ProfilState extends State<Profil> {
                           leading: CircleAvatar(
                             backgroundImage: AssetImage('assets/images/profil/1.jpg'),
                           ),
-                          title: Text('Recconnaître ses émotions',
+                          title: Text('Reconnaître ses émotions',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: cyanGreen

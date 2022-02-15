@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'package:flutter/material.dart';
 
 main() => runApp(
@@ -47,7 +47,15 @@ class _RechercherState extends State<Rechercher> {
             style: TextStyle(color: Colors.black),
           ),
         ),
-        //body: TabBarView(children: [Container(), Container()]),
+        body: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(padding: EdgeInsets.only(top: 50)),
+            Text('Tendances actuelles', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+          ],
+        )
+        )
       );
   }
 }

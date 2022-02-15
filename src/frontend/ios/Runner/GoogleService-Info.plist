@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>217766821466-er02e2kk7jbbq5m0llf6r7okbkmdrg22.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.217766821466-er02e2kk7jbbq5m0llf6r7okbkmdrg22</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDU0jfXLdiKK03s0dbmaVWfoUZZz0QgOWs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>217766821466</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.raywenderlich.petmedical</string>
+	<key>PROJECT_ID</key>
+	<string>ressourcesrelationnelles-e33ea</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ressourcesrelationnelles-e33ea.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:217766821466:ios:554b8a34c0a8387915e263</string>
+</dict>
+</plist>
