@@ -18,7 +18,7 @@
         </div>
         <div class="tw-flex tw-justify-evenly tw-mt-4">
           <q-icon name="message" class="tw-cursor-pointer tw-text-2xl" />
-          <template v-if="me.id">
+          <template v-if="me && me.id">
             <q-icon v-if="entrie.post.isLiked" name="fas fa-heart" class="tw-cursor-pointer tw-text-2xl tw-text-red-400" />
             <q-icon v-else name="far fa-heart" class="tw-cursor-pointer tw-text-2xl" />
           </template>
@@ -58,7 +58,7 @@ export default defineComponent({
     posts.value = await api.$get("/v1/post").then((d) => d.data);
 
     const me = computed(() => store.getters["auth/me"]);
-    if (me.value.id) {
+    if (me.value?.id) {
       for (const post of posts.value.map((d) => d.post)) {
         api.$get(`/v1/post/${post.id}/isLiked`).then((isLiked) => {
           post.isLiked = isLiked;
