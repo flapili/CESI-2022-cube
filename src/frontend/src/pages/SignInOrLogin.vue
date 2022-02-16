@@ -69,6 +69,7 @@
           </template>
         </q-input>
         <q-btn class="tw-bg-primary tw-text-white tw-rounded-none" @click="logIn" :disable="disabledLogin" :loading="isLogin"> Connexion </q-btn>
+        <q-btn class="tw-bg-black tw-text-white tw-rounded-none" @click="openForgotPasswordDialog"> Mot de passe oublié </q-btn>
       </q-form>
     </div>
   </q-page>
@@ -89,6 +90,26 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const tab = ref("logIn");
+
+    const resetPassword = async (email) => {
+      await api.$post("/v1/reset_password/send_mail", { email });
+      $q.notify({
+        position: "top",
+        message: "Un email viens de vous être envoyé",
+        type: "positive",
+      });
+    };
+
+    function openForgotPasswordDialog() {
+      $q.dialog({
+        message: "Quel est votre mail ?",
+        prompt: { model: "", isValid: isValidEmail },
+        cancel: true,
+        persistent: true,
+      }).onOk(async (email) => {
+        await resetPassword(email);
+      });
+    }
 
     const isValidEmail = (val) => {
       const re = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}\.){1,8}[a-zA-Z]{2,63}$/;
@@ -202,6 +223,7 @@ export default defineComponent({
       email,
       password,
       disabledLogin,
+      openForgotPasswordDialog,
     };
   },
 });

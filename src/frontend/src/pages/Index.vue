@@ -9,18 +9,29 @@
           </q-avatar>
           <div class="tw-grow tw-text-center">
             <div class="tw-font-bold">{{ entrie.post.title }}</div>
-            <div>{{types[entrie.post.type]}}</div>
+            <div>{{ types[entrie.post.type] }}</div>
           </div>
           <div class="tw-w-12" />
         </div>
-        {{ entrie.post }}
+        <div class="tw-line-clamp-4 tw-mt-4 tw-text-justify">
+          {{ entrie.post.content }}
+        </div>
+        <div class="tw-flex tw-justify-evenly tw-mt-4">
+          <q-icon name="message" class="tw-cursor-pointer tw-text-2xl" />
+          <template v-if="me.id">
+            <q-icon v-if="entrie.post.isLiked" name="fas fa-heart" class="tw-cursor-pointer tw-text-2xl tw-text-red-400" />
+            <q-icon v-else name="far fa-heart" class="tw-cursor-pointer tw-text-2xl" />
+          </template>
+          <q-icon name="share" class="tw-cursor-pointer tw-text-2xl" />
+        </div>
       </div>
     </div>
   </q-page>
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
+import { useStore } from "vuex";
 
 import { api, apiBaseURL } from "boot/axios";
 
@@ -41,12 +52,25 @@ const types = {
 export default defineComponent({
   name: "PageIndex",
   async setup() {
+    const store = useStore();
+
     const posts = ref([]);
     posts.value = await api.$get("/v1/post").then((d) => d.data);
+
+    const me = computed(() => store.getters["auth/me"]);
+    if (me.value.id) {
+      for (const post of posts.value.map((d) => d.post)) {
+        api.$get(`/v1/post/${post.id}/isLiked`).then((isLiked) => {
+          post.isLiked = isLiked;
+        });
+      }
+    }
+
     return {
       apiBaseURL,
       posts,
       types,
+      me,
     };
   },
 });

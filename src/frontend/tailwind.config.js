@@ -1,4 +1,7 @@
 module.exports = {
+  plugins: [
+    require('@tailwindcss/line-clamp'),
+  ],
   content: ["./src/**/*.{html,js,vue}"],
   theme: {
     extend: {
@@ -8,6 +11,5 @@ module.exports = {
       }
     },
   },
-  plugins: [],
   prefix: "tw-",
 }
